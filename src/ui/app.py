@@ -5,7 +5,9 @@ from src.core.factory import DownloaderFactory
 from src.core.models import DownloadTask, TaskStatus
 from src.services.manager import DownloadManager
 from src.ui.theme import COLORS, FONTS
+from src.ui.views.channel_view import YouTubeChannelView
 from src.ui.views.home_view import HomeView
+from src.ui.views.playlist_view import YouTubePlaylistView
 from src.ui.views.youtube_view import YouTubeView
 
 
@@ -19,7 +21,6 @@ class MediaDownloaderApp(ctk.CTk):
         self.minsize(920, 580)
         self.configure(fg_color=COLORS["bg_main"])
 
-        # Khởi tạo tầng Core & Service (không phụ thuộc UI)
         self._factory = DownloaderFactory()
         self._manager = DownloadManager(
             factory=self._factory,
@@ -61,7 +62,7 @@ class MediaDownloaderApp(ctk.CTk):
         ).pack(anchor="w")
         ctk.CTkLabel(
             brand_frame,
-            text="Media Engine v1.0",
+            text="OOP Media Engine v1.0",
             font=FONTS["small"],
             text_color=COLORS["text_muted"],
         ).pack(anchor="w")
@@ -69,6 +70,8 @@ class MediaDownloaderApp(ctk.CTk):
         # Nhóm điều hướng chính
         self._add_nav_button(sidebar, "home", "Trang chủ", row=1, active=True)
         self._add_nav_button(sidebar, "youtube", "YouTube", row=2, active=True)
+        self._add_nav_button(sidebar, "yt_playlist", "YouTube Playlist", row=3, active=True)
+        self._add_nav_button(sidebar, "yt_channel", "YouTube Channel", row=4, active=True)
 
         # Đường kẻ phân cách nhóm đang phát triển
         ctk.CTkLabel(
@@ -77,22 +80,21 @@ class MediaDownloaderApp(ctk.CTk):
             font=("Segoe UI", 10, "bold"),
             text_color=COLORS["text_muted"],
             anchor="w",
-        ).grid(row=3, column=0, sticky="ew", padx=20, pady=(22, 6))
+        ).grid(row=5, column=0, sticky="ew", padx=20, pady=(22, 6))
 
         updating_items = [
-            ("yt_playlist", "YouTube Playlist (Updating...)"),
             ("tiktok", "TikTok (Updating...)"),
             ("facebook", "Facebook (Updating...)"),
             ("instagram", "Instagram (Updating...)"),
             ("twitter", "X / Twitter (Updating...)"),
         ]
-        for idx, (key, label) in enumerate(updating_items, start=4):
+        for idx, (key, label) in enumerate(updating_items, start=6):
             self._add_nav_button(sidebar, key, label, row=idx, active=False)
 
         # Bộ đếm trạng thái dưới đáy Sidebar
         self.stats_label = ctk.CTkLabel(
             sidebar,
-            text="Hàng đợi: 0 đang tải | 0 xong",
+            text="Hàng đợi: 0 đang xử lý | 0 xong",
             font=FONTS["small"],
             text_color=COLORS["text_secondary"],
             fg_color=COLORS["bg_card"],
@@ -129,6 +131,8 @@ class MediaDownloaderApp(ctk.CTk):
         self._views = {
             "home": HomeView(self._container, on_select_platform=self._switch_view),
             "youtube": YouTubeView(self._container, manager=self._manager),
+            "yt_playlist": YouTubePlaylistView(self._container, manager=self._manager),
+            "yt_channel": YouTubeChannelView(self._container, manager=self._manager),
         }
 
     def _switch_view(self, view_key: str) -> None:
@@ -148,12 +152,12 @@ class MediaDownloaderApp(ctk.CTk):
             )
 
     def _on_worker_task_update(self, task: DownloadTask) -> None:
-        """Nhận callback từ Worker Thread -> đẩy về Main UI Thread an toàn."""
         self.after(0, self._apply_ui_update, task)
 
     def _apply_ui_update(self, task: DownloadTask) -> None:
-        youtube_view: YouTubeView = self._views["youtube"]
-        youtube_view.render_task_update(task)
+        target_view = self._views.get(task.source)
+        if target_view and hasattr(target_view, "render_task_update"):
+            target_view.render_task_update(task)
 
         tasks = self._manager.get_all_tasks()
         active_count = sum(

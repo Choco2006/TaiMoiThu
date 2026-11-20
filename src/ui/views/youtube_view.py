@@ -19,23 +19,23 @@ class YouTubeView(ctk.CTkFrame):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(2, weight=1)
 
-        # 1. Tiêu đề màn hình
+        # 1. Header
         header = ctk.CTkFrame(self, fg_color="transparent")
         header.grid(row=0, column=0, sticky="ew", padx=28, pady=(24, 12))
         ctk.CTkLabel(
             header,
-            text="YouTube Video Downloader",
+            text="YouTube Video & Audio Downloader",
             font=FONTS["h1"],
             text_color=COLORS["text_primary"],
         ).pack(anchor="w")
         ctk.CTkLabel(
             header,
-            text="Dán một hoặc nhiều đường link YouTube (mỗi link một dòng) để đưa vào hàng đợi tải đa luồng.",
+            text="Dán một hoặc nhiều đường dẫn video YouTube (mỗi dòng 1 link) để tải video hoặc tách âm thanh.",
             font=FONTS["body"],
             text_color=COLORS["text_secondary"],
         ).pack(anchor="w", pady=(2, 0))
 
-        # 2. Khung nhập liệu & Tùy chọn
+        # 2. Khung nhập URL & Tùy chọn chất lượng
         input_card = ctk.CTkFrame(
             self,
             fg_color=COLORS["bg_card"],
@@ -48,7 +48,7 @@ class YouTubeView(ctk.CTkFrame):
 
         self.url_textbox = ctk.CTkTextbox(
             input_card,
-            height=90,
+            height=86,
             fg_color=COLORS["bg_input"],
             border_width=1,
             border_color=COLORS["border"],
@@ -56,31 +56,26 @@ class YouTubeView(ctk.CTkFrame):
             font=FONTS["body"],
             corner_radius=8,
         )
-        self.url_textbox.grid(row=0, column=0, sticky="ew", padx=16, pady=(16, 12))
+        self.url_textbox.grid(row=0, column=0, sticky="ew", padx=14, pady=(14, 10))
 
-        # Thanh công cụ dưới ô nhập
-        controls = ctk.CTkFrame(input_card, fg_color="transparent")
-        controls.grid(row=1, column=0, sticky="ew", padx=16, pady=(0, 16))
-        controls.grid_columnconfigure(2, weight=1)
-
-        ctk.CTkLabel(
-            controls, text="Độ phân giải:", font=FONTS["body"], text_color=COLORS["text_secondary"]
-        ).grid(row=0, column=0, padx=(0, 8))
+        action_bar = ctk.CTkFrame(input_card, fg_color="transparent")
+        action_bar.grid(row=1, column=0, sticky="ew", padx=14, pady=(0, 14))
+        action_bar.grid_columnconfigure(1, weight=1)
 
         self.res_menu = ctk.CTkOptionMenu(
-            controls,
-            values=["1080p", "720p", "480p", "best"],
-            width=105,
+            action_bar,
+            values=["1080p", "720p", "480p", "best", "MP3 (Audio)", "M4A (Audio)"],
+            width=125,
             fg_color=COLORS["bg_input"],
             button_color=COLORS["border"],
             button_hover_color=COLORS["primary"],
-            font=FONTS["body"],
+            font=FONTS["small"],
         )
         self.res_menu.set("1080p")
-        self.res_menu.grid(row=0, column=1, padx=(0, 14))
+        self.res_menu.grid(row=0, column=0, padx=(0, 10))
 
         self.dir_btn = ctk.CTkButton(
-            controls,
+            action_bar,
             text=f"Lưu tại: .../{Path(self._output_dir).name}",
             fg_color=COLORS["bg_input"],
             hover_color=COLORS["bg_card_hover"],
@@ -91,50 +86,44 @@ class YouTubeView(ctk.CTkFrame):
             anchor="w",
             command=self._choose_directory,
         )
-        self.dir_btn.grid(row=0, column=2, sticky="ew", padx=(0, 14))
+        self.dir_btn.grid(row=0, column=1, sticky="ew", padx=(0, 10))
+
+        ctk.CTkButton(
+            action_bar,
+            text="Xóa ô nhập",
+            width=95,
+            height=34,
+            fg_color=COLORS["bg_input"],
+            hover_color=COLORS["bg_card_hover"],
+            border_width=1,
+            border_color=COLORS["border"],
+            text_color=COLORS["text_secondary"],
+            font=FONTS["small"],
+            command=lambda: self.url_textbox.delete("1.0", "end"),
+        ).grid(row=0, column=2, padx=(0, 10))
 
         self.download_btn = ctk.CTkButton(
-            controls,
-            text="Thêm vào hàng đợi tải",
+            action_bar,
+            text="Tải xuống",
             font=FONTS["body_bold"],
             fg_color=COLORS["primary"],
             hover_color=COLORS["primary_hover"],
-            height=36,
-            width=180,
+            height=34,
+            width=140,
             command=self._submit_urls,
         )
         self.download_btn.grid(row=0, column=3, sticky="e")
 
-        # 3. Khu vực danh sách tiến độ tải
-        queue_header = ctk.CTkFrame(self, fg_color="transparent")
-        queue_header.grid(row=2, column=0, sticky="nsew", padx=28, pady=(0, 20))
-        queue_header.grid_columnconfigure(0, weight=1)
-        queue_header.grid_rowconfigure(1, weight=1)
-
-        ctk.CTkLabel(
-            queue_header,
-            text="Tiến độ hàng đợi (Tối đa 3 luồng song song)",
-            font=FONTS["h2"],
-            text_color=COLORS["text_primary"],
-        ).grid(row=0, column=0, sticky="w", pady=(0, 8))
-
+        # 3. Khu vực hàng đợi tải
         self.queue_scroll = ctk.CTkScrollableFrame(
-            queue_header,
+            self,
             fg_color=COLORS["bg_input"],
             corner_radius=12,
             border_width=1,
             border_color=COLORS["border"],
         )
-        self.queue_scroll.grid(row=1, column=0, sticky="nsew")
+        self.queue_scroll.grid(row=2, column=0, sticky="nsew", padx=28, pady=(0, 20))
         self.queue_scroll.grid_columnconfigure(0, weight=1)
-
-        self.empty_label = ctk.CTkLabel(
-            self.queue_scroll,
-            text="Chưa có video nào trong hàng đợi. Hãy dán link YouTube ở phía trên để bắt đầu.",
-            font=FONTS["body"],
-            text_color=COLORS["text_muted"],
-        )
-        self.empty_label.grid(row=0, column=0, pady=40)
 
     def _choose_directory(self) -> None:
         selected = filedialog.askdirectory(initialdir=self._output_dir)
@@ -148,22 +137,21 @@ class YouTubeView(ctk.CTkFrame):
             return
 
         urls = [line.strip() for line in raw_text.splitlines() if line.strip()]
-        resolution = self.res_menu.get()
+        if not urls:
+            return
 
+        resolution = self.res_menu.get()
         for url in urls:
             self._manager.add_task(
                 url=url,
                 output_dir=self._output_dir,
                 resolution=resolution,
+                source="youtube",
             )
 
         self.url_textbox.delete("1.0", "end")
 
     def render_task_update(self, task: DownloadTask) -> None:
-        """Hàm này luôn được gọi trên Main UI Thread."""
-        if self.empty_label.winfo_exists():
-            self.empty_label.destroy()
-
         if task.task_id not in self._task_rows:
             row_idx = len(self._task_rows)
             row = TaskRow(self.queue_scroll, task)

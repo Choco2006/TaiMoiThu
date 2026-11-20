@@ -47,7 +47,8 @@ class HomeView(ctk.CTkFrame):
 
         platforms: List[Tuple[str, str, str, str, bool]] = [
             ("youtube", "YouTube", "Tải video đơn lẻ hoặc nhiều link cùng lúc (lên tới 1080p+)", "#EF4444", True),
-            ("yt_playlist", "YouTube Playlist", "Tải trọn bộ danh sách phát tự động", "#DC2626", False),
+            ("yt_playlist", "YouTube Playlist", "Tải trọn bộ danh sách phát tự động", "#DC2626", True),
+            ("yt_channel", "YouTube Channel", "Quét và tải video, Shorts từ cả kênh", "#B91C1C", True),
             ("tiktok", "TikTok", "Tải video không dính logo (Watermark-free)", "#14B8A6", False),
             ("facebook", "Facebook", "Tải video công khai & Reels chất lượng HD", "#3B82F6", False),
             ("instagram", "Instagram", "Tải Reels, Video bài viết và Stories", "#EC4899", False),

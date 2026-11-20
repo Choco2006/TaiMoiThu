@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
+from typing import List, Optional
 
 
 @dataclass(frozen=True)
@@ -9,6 +9,23 @@ class VideoMetadata:
     title: str
     uploader: str
     duration_sec: int
+
+
+@dataclass(frozen=True)
+class PlaylistItem:
+    index: int
+    url: str
+    title: str
+    duration_sec: int
+    is_available: bool = True
+
+
+@dataclass(frozen=True)
+class PlaylistMetadata:
+    url: str
+    title: str
+    uploader: str
+    items: List[PlaylistItem]
 
 
 @dataclass(frozen=True)
@@ -33,6 +50,7 @@ class DownloadTask:
     url: str
     output_dir: str = "downloads"
     resolution: str = "1080p"
+    source: str = "youtube"      # Phân biệt tác vụ từ màn hình YouTube hay Playlist
     status: TaskStatus = TaskStatus.PENDING
     title: Optional[str] = None
     progress: float = 0.0
