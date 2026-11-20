@@ -8,6 +8,8 @@ from src.ui.theme import COLORS, FONTS
 from src.ui.views.channel_view import YouTubeChannelView
 from src.ui.views.home_view import HomeView
 from src.ui.views.playlist_view import YouTubePlaylistView
+from src.ui.views.tiktok_profile_view import TikTokProfileView
+from src.ui.views.tiktok_view import TikTokView
 from src.ui.views.youtube_view import YouTubeView
 
 
@@ -49,7 +51,7 @@ class MediaDownloaderApp(ctk.CTk):
         sidebar.grid(row=0, column=0, sticky="nsew")
         sidebar.grid_propagate(False)
         sidebar.grid_columnconfigure(0, weight=1)
-        sidebar.grid_rowconfigure(10, weight=1)
+        sidebar.grid_rowconfigure(11, weight=1)
 
         # Brand Header
         brand_frame = ctk.CTkFrame(sidebar, fg_color="transparent")
@@ -72,6 +74,8 @@ class MediaDownloaderApp(ctk.CTk):
         self._add_nav_button(sidebar, "youtube", "YouTube", row=2, active=True)
         self._add_nav_button(sidebar, "yt_playlist", "YouTube Playlist", row=3, active=True)
         self._add_nav_button(sidebar, "yt_channel", "YouTube Channel", row=4, active=True)
+        self._add_nav_button(sidebar, "tiktok", "TikTok", row=5, active=True)
+        self._add_nav_button(sidebar, "tiktok_profile", "TikTok Profile", row=6, active=True)
 
         # Đường kẻ phân cách nhóm đang phát triển
         ctk.CTkLabel(
@@ -80,15 +84,14 @@ class MediaDownloaderApp(ctk.CTk):
             font=("Segoe UI", 10, "bold"),
             text_color=COLORS["text_muted"],
             anchor="w",
-        ).grid(row=5, column=0, sticky="ew", padx=20, pady=(22, 6))
+        ).grid(row=7, column=0, sticky="ew", padx=20, pady=(22, 6))
 
         updating_items = [
-            ("tiktok", "TikTok (Updating...)"),
             ("facebook", "Facebook (Updating...)"),
             ("instagram", "Instagram (Updating...)"),
             ("twitter", "X / Twitter (Updating...)"),
         ]
-        for idx, (key, label) in enumerate(updating_items, start=6):
+        for idx, (key, label) in enumerate(updating_items, start=8):
             self._add_nav_button(sidebar, key, label, row=idx, active=False)
 
         # Bộ đếm trạng thái dưới đáy Sidebar
@@ -101,7 +104,7 @@ class MediaDownloaderApp(ctk.CTk):
             corner_radius=8,
             height=34,
         )
-        self.stats_label.grid(row=11, column=0, sticky="ew", padx=14, pady=16)
+        self.stats_label.grid(row=12, column=0, sticky="ew", padx=14, pady=16)
 
     def _add_nav_button(
         self, parent, key: str, label: str, row: int, active: bool
@@ -133,6 +136,8 @@ class MediaDownloaderApp(ctk.CTk):
             "youtube": YouTubeView(self._container, manager=self._manager),
             "yt_playlist": YouTubePlaylistView(self._container, manager=self._manager),
             "yt_channel": YouTubeChannelView(self._container, manager=self._manager),
+            "tiktok": TikTokView(self._container, manager=self._manager),
+            "tiktok_profile": TikTokProfileView(self._container, manager=self._manager),
         }
 
     def _switch_view(self, view_key: str) -> None:
