@@ -1,6 +1,8 @@
 from typing import List
 
 from src.core.base import BaseDownloader
+from src.core.providers.facebook import FacebookDownloader
+from src.core.providers.instagram import InstagramDownloader
 from src.core.providers.tiktok import TikTokDownloader
 from src.core.providers.youtube import YouTubeDownloader
 
@@ -10,6 +12,8 @@ class DownloaderFactory:
         self._providers: List[BaseDownloader] = [
             YouTubeDownloader(),
             TikTokDownloader(),
+            FacebookDownloader(),
+            InstagramDownloader(),
         ]
 
     def create(self, url: str) -> BaseDownloader:
