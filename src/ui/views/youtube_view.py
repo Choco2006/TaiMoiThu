@@ -1,3 +1,4 @@
+from src.utils.system import get_default_download_dir
 from pathlib import Path
 from tkinter import filedialog
 from typing import Dict
@@ -13,7 +14,7 @@ class YouTubeView(ctk.CTkFrame):
     def __init__(self, master, manager: DownloadManager, **kwargs) -> None:
         super().__init__(master, fg_color="transparent", **kwargs)
         self._manager = manager
-        self._output_dir = str(Path("downloads").resolve())
+        self._output_dir = get_default_download_dir()
         self._task_rows: Dict[str, TaskRow] = {}
 
         self.grid_columnconfigure(0, weight=1)

@@ -66,7 +66,7 @@ class MediaDownloaderApp(ctk.CTk):
         ).pack(anchor="w")
         ctk.CTkLabel(
             brand_frame,
-            text="OOP Media Engine v1.0",
+            text="Media Engine v1.0",
             font=FONTS["small"],
             text_color=COLORS["text_muted"],
         ).pack(anchor="w")

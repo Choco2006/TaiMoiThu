@@ -1,3 +1,4 @@
+from src.utils.system import get_default_download_dir
 from pathlib import Path
 import re
 import threading
@@ -30,7 +31,7 @@ class YouTubePlaylistView(ctk.CTkFrame):
         super().__init__(master, fg_color="transparent", **kwargs)
         self._manager = manager
         self._extractor = YouTubeDownloader()
-        self._output_dir = str(Path("downloads").resolve())
+        self._output_dir = get_default_download_dir()
 
         self._current_playlist: Optional[PlaylistMetadata] = None
         self._item_vars: List[Tuple[PlaylistItem, ctk.BooleanVar]] = []
