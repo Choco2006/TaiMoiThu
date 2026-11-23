@@ -1,4 +1,6 @@
+import ctypes
 import os
+import sys
 import customtkinter as ctk
 
 from src.core.factory import DownloaderFactory
@@ -15,8 +17,14 @@ from src.ui.views.tiktok_view import TikTokView
 from src.ui.views.youtube_view import YouTubeView
 
 
+def _resource_path(relative_path: str) -> str:
+    base_path = getattr(sys, "_MEIPASS", os.path.abspath("."))
+    return os.path.join(base_path, relative_path)
+
+
 class MediaDownloaderApp(ctk.CTk):
     def __init__(self) -> None:
+        self._set_windows_app_id()
         super().__init__()
         ctk.set_appearance_mode("dark")
 
@@ -24,6 +32,7 @@ class MediaDownloaderApp(ctk.CTk):
         self.geometry("1060x720")
         self.minsize(920, 620)
         self.configure(fg_color=COLORS["bg_main"])
+        self._setup_icon()
 
         self._factory = DownloaderFactory()
         self._manager = DownloadManager(
@@ -42,6 +51,28 @@ class MediaDownloaderApp(ctk.CTk):
         self._switch_view("home")
 
         self.protocol("WM_DELETE_WINDOW", self._on_close)
+
+    @staticmethod
+    def _set_windows_app_id() -> None:
+        if sys.platform.startswith("win"):
+            try:
+                ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+                    "TaiMoiThu.MediaDownloader.1.0"
+                )
+            except Exception:
+                pass
+
+    def _setup_icon(self) -> None:
+        for rel_path in ("assets/app.ico", "assests/app.ico", "app.ico"):
+            icon_path = _resource_path(os.path.normpath(rel_path))
+            if os.path.exists(icon_path):
+                try:
+                    self.iconbitmap(icon_path)
+                    # CustomTkinter tự set icon mặc định sau ~200ms trên Windows nên cần ghi đè lại
+                    self.after(250, lambda p=icon_path: self.iconbitmap(p))
+                except Exception:
+                    pass
+                break
 
     def _build_sidebar(self) -> None:
         sidebar = ctk.CTkFrame(
