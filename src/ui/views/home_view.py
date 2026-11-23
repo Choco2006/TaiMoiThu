@@ -43,6 +43,7 @@ class HomeView(ctk.CTkFrame):
             ("tiktok_profile", "TikTok Profile", "Quét và tải hàng loạt video từ tài khoản", "#0D9488", True),
             ("facebook", "Facebook", "Tải Video, Watch & Reels công khai", "#3B82F6", True),
             ("instagram", "Instagram", "Tải Reels & Video công khai", "#EC4899", True),
+            ("twitter", "X / Twitter", "Tải Video & GIF từ bài đăng X", "#1D9BF0", True),
         ]
 
         for idx, (key, title, desc, accent, active) in enumerate(platforms):

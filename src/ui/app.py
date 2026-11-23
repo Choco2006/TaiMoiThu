@@ -14,6 +14,7 @@ from src.ui.views.instagram_view import InstagramView
 from src.ui.views.playlist_view import YouTubePlaylistView
 from src.ui.views.tiktok_profile_view import TikTokProfileView
 from src.ui.views.tiktok_view import TikTokView
+from src.ui.views.twitter_view import TwitterView
 from src.ui.views.youtube_view import YouTubeView
 
 
@@ -112,20 +113,10 @@ class MediaDownloaderApp(ctk.CTk):
             ("tiktok_profile", "TikTok Profile", 6),
             ("facebook", "Facebook", 7),
             ("instagram", "Instagram", 8),
+            ("twitter", "X / Twitter", 9),
         ]
         for key, label, row in nav_items:
             self._add_nav_button(sidebar, key, label, row=row, active=True)
-
-        # Đường kẻ phân cách nhóm mở rộng
-        ctk.CTkLabel(
-            sidebar,
-            text="NỀN TẢNG MỞ RỘNG",
-            font=("Segoe UI", 10, "bold"),
-            text_color=COLORS["text_muted"],
-            anchor="w",
-        ).grid(row=9, column=0, sticky="ew", padx=20, pady=(18, 6))
-
-        self._add_nav_button(sidebar, "twitter", "X / Twitter (Updating...)", row=10, active=False)
 
         # Bộ đếm trạng thái dưới đáy Sidebar
         self.stats_label = ctk.CTkLabel(
@@ -173,6 +164,7 @@ class MediaDownloaderApp(ctk.CTk):
             "tiktok_profile": TikTokProfileView(self._container, manager=self._manager),
             "facebook": FacebookView(self._container, manager=self._manager),
             "instagram": InstagramView(self._container, manager=self._manager),
+            "twitter": TwitterView(self._container, manager=self._manager),
         }
 
     def _switch_view(self, view_key: str) -> None:
