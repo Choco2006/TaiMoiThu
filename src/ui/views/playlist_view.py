@@ -1,4 +1,3 @@
-from src.utils.system import get_default_download_dir
 from pathlib import Path
 import re
 import threading
@@ -11,6 +10,7 @@ from src.core.providers.youtube import YouTubeDownloader
 from src.services.manager import DownloadManager
 from src.ui.components.task_row import TaskRow
 from src.ui.theme import COLORS, FONTS
+from src.utils.system import get_default_download_dir
 
 
 def _sanitize_folder_name(name: str) -> str:
@@ -39,7 +39,7 @@ class YouTubePlaylistView(ctk.CTkFrame):
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(2, weight=1)
-        self.grid_rowconfigure(3, weight=1)
+        self.grid_rowconfigure(4, weight=1)
 
         # 1. Header
         header = ctk.CTkFrame(self, fg_color="transparent")
@@ -212,7 +212,34 @@ class YouTubePlaylistView(ctk.CTkFrame):
         )
         self.download_btn.grid(row=0, column=4, sticky="e")
 
-        # 4. Khu vực tiến độ tải
+        # 4. Thanh điều khiển hàng đợi
+        queue_header = ctk.CTkFrame(self, fg_color="transparent")
+        queue_header.grid(row=3, column=0, sticky="ew", padx=28, pady=(0, 6))
+        queue_header.grid_columnconfigure(0, weight=1)
+
+        ctk.CTkLabel(
+            queue_header,
+            text="Hàng đợi tải xuống",
+            font=FONTS["body_bold"],
+            text_color=COLORS["text_secondary"],
+        ).grid(row=0, column=0, sticky="w")
+
+        ctk.CTkButton(
+            queue_header,
+            text="Xóa tất cả",
+            width=90,
+            height=28,
+            corner_radius=6,
+            fg_color=COLORS["bg_card"],
+            hover_color="#331B1E",
+            border_width=1,
+            border_color=COLORS["border"],
+            text_color=COLORS["danger"],
+            font=FONTS["small"],
+            command=self._clear_all_tasks,
+        ).grid(row=0, column=1, sticky="e")
+
+        # 5. Khu vực tiến độ tải
         self.queue_scroll = ctk.CTkScrollableFrame(
             self,
             fg_color=COLORS["bg_input"],
@@ -221,7 +248,7 @@ class YouTubePlaylistView(ctk.CTkFrame):
             border_color=COLORS["border"],
             height=140,
         )
-        self.queue_scroll.grid(row=3, column=0, sticky="nsew", padx=28, pady=(0, 20))
+        self.queue_scroll.grid(row=4, column=0, sticky="nsew", padx=28, pady=(0, 20))
         self.queue_scroll.grid_columnconfigure(0, weight=1)
 
     def _choose_directory(self) -> None:
@@ -316,10 +343,27 @@ class YouTubePlaylistView(ctk.CTkFrame):
                 title=f"{item.index:02d} - {item.title}",
             )
 
+    def _delete_single_task(self, task_id: str) -> None:
+        self._manager.remove_task(task_id)
+        row = self._task_rows.pop(task_id, None)
+        if row:
+            row.destroy()
+        for idx, remaining_row in enumerate(self._task_rows.values()):
+            remaining_row.grid(row=idx, column=0, sticky="ew", padx=8, pady=6)
+
+    def _clear_all_tasks(self) -> None:
+        self._manager.clear_tasks(source="yt_playlist")
+        for row in self._task_rows.values():
+            row.destroy()
+        self._task_rows.clear()
+
     def render_task_update(self, task: DownloadTask) -> None:
+        if not self._manager.has_task(task.task_id):
+            return
+
         if task.task_id not in self._task_rows:
             row_idx = len(self._task_rows)
-            row = TaskRow(self.queue_scroll, task)
+            row = TaskRow(self.queue_scroll, task, on_delete=self._delete_single_task)
             row.grid(row=row_idx, column=0, sticky="ew", padx=8, pady=6)
             self._task_rows[task.task_id] = row
         else:

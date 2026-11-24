@@ -1,10 +1,17 @@
+from typing import Callable, Optional
 import customtkinter as ctk
 from src.core.models import DownloadTask, TaskStatus
 from src.ui.theme import COLORS, FONTS
 
 
 class TaskRow(ctk.CTkFrame):
-    def __init__(self, master, task: DownloadTask, **kwargs) -> None:
+    def __init__(
+        self,
+        master,
+        task: DownloadTask,
+        on_delete: Optional[Callable[[str], None]] = None,
+        **kwargs,
+    ) -> None:
         super().__init__(
             master,
             fg_color=COLORS["bg_card"],
@@ -13,9 +20,11 @@ class TaskRow(ctk.CTkFrame):
             border_color=COLORS["border"],
             **kwargs,
         )
+        self.task_id = task.task_id
+        self._on_delete = on_delete
         self.grid_columnconfigure(0, weight=1)
 
-        # Hàng trên: Tiêu đề video + Nhãn trạng thái
+        # Hàng trên: Tiêu đề video + Nhãn trạng thái + Nút xóa
         top_frame = ctk.CTkFrame(self, fg_color="transparent")
         top_frame.grid(row=0, column=0, sticky="ew", padx=14, pady=(10, 4))
         top_frame.grid_columnconfigure(0, weight=1)
@@ -40,6 +49,21 @@ class TaskRow(ctk.CTkFrame):
             pady=2,
         )
         self.status_badge.grid(row=0, column=1, sticky="e")
+
+        if self._on_delete:
+            self.delete_btn = ctk.CTkButton(
+                top_frame,
+                text="✕",
+                width=26,
+                height=24,
+                corner_radius=6,
+                font=FONTS["small"],
+                fg_color="transparent",
+                hover_color="#331B1E",
+                text_color=COLORS["text_muted"],
+                command=lambda: self._on_delete(self.task_id),
+            )
+            self.delete_btn.grid(row=0, column=2, sticky="e", padx=(6, 0))
 
         # Hàng giữa: Thanh tiến trình
         self.progress_bar = ctk.CTkProgressBar(
